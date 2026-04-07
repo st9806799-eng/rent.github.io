@@ -1,0 +1,99 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  OWNER
+  ADMIN
+}
+
+model User {
+  id           String     @id @default(cuid())
+  email        String     @unique
+  passwordHash String
+  role         UserRole   @default(OWNER)
+  businesses   Business[]
+  createdAt    DateTime   @default(now())
+}
+
+model Business {
+  id               String   @id @default(cuid())
+  name             String
+  phone            String
+  address          String?
+  description      String?
+  portfolio        Json?
+  locationLat      Float?
+  locationLng      Float?
+  locationAddress  String?
+  slug             String   @unique
+  /// Chat ID владельца в Telegram (число как строка) для уведомлений о бронях
+  telegramChatId   String?
+  ownerId          String
+  owner     User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  branches  Branch[]
+  createdAt DateTime @default(now())
+}
+
+model Branch {
+  id           String         @id @default(cuid())
+  businessId   String
+  business     Business       @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  name         String         @default("Main")
+  services     Service[]
+  hours        BranchHours[]
+  reservations Reservation[]
+}
+
+/// dayOfWeek: 0 = Sunday … 6 = Saturday (JavaScript getDay)
+model BranchHours {
+  id        String  @id @default(cuid())
+  branchId  String
+  branch    Branch  @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  dayOfWeek Int
+  openTime  String
+  closeTime String
+  isOpen    Boolean @default(true)
+
+  @@unique([branchId, dayOfWeek])
+}
+
+model Service {
+  id              String        @id @default(cuid())
+  branchId        String
+  branch          Branch        @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  name            String
+  durationMinutes Int
+  priceCents      Int?
+  reservations    Reservation[]
+}
+
+model Reservation {
+  id                   String    @id @default(cuid())
+  branchId             String
+  branch               Branch    @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  serviceId            String
+  service              Service   @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  startAt              DateTime
+  endAt                DateTime
+  clientName           String
+  clientPhone          String
+  status               String    @default("confirmed")
+  createdAt            DateTime  @default(now())
+  /// Привязка клиента к боту для напоминаний (Telegram chat id)
+  clientTelegramChatId String?
+  /// Одноразовый токен для deep link t.me/bot?start=reminder_<token>
+  reminderLinkToken    String?   @unique
+  /// Когда отправили напоминание за ~24 ч (чтобы не дублировать)
+  reminderSentAt       DateTime?
+  /// Для status=pending_payment — слот утримується до цього часу
+  paymentExpiresAt     DateTime?
+
+  @@index([branchId, startAt])
+  @@index([clientPhone, branchId])
+}
