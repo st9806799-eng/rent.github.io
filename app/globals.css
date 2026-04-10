@@ -18,4 +18,19 @@ body {
   color: var(--text);
   font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
   min-height: 100dvh;
+  overflow-x: hidden;
+}
+
+img,
+video,
+canvas,
+svg,
+iframe {
+  max-width: 100%;
+}
+
+.leaflet-container {
+  width: 100%;
+  max-width: 100%;
+  touch-action: pan-x pan-y;
 }

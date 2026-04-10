@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useActionState, useEffect, useMemo, useState, useTransition } from "react";
 import { CircleMarker, MapContainer, TileLayer, useMapEvents } from "react-leaflet";
 import { updateBusinessProfileAction } from "@/app/actions/business";
+import { useI18n } from "@/components/I18nProvider";
 import { FormError, Shell, Submit } from "@/components/Shell";
 
 type Point = { lat: number; lng: number } | null;
@@ -41,6 +42,7 @@ export function BusinessProfileEditor({
   initialLocation: Point;
   initialPortfolio: string[];
 }) {
+  const { t } = useI18n();
   const [error, formAction] = useActionState(updateBusinessProfileAction, null);
   const [pending, startTransition] = useTransition();
 
@@ -93,17 +95,17 @@ export function BusinessProfileEditor({
 
   return (
     <Shell
-      title="Store profile"
+      title={t("profile.title")}
       action={
         <Link href="/dashboard" className="text-sm text-[var(--muted)] hover:text-[var(--text)]">
-          Back
+          {t("dash.back")}
         </Link>
       }
     >
       <form action={formAction} className="space-y-4">
         <FormError message={error} />
         <label className="block">
-          <span className="mb-1 block text-sm text-[var(--muted)]">Store name</span>
+          <span className="mb-1 block text-sm text-[var(--muted)]">{t("profile.storeName")}</span>
           <input
             name="name"
             required
@@ -113,18 +115,18 @@ export function BusinessProfileEditor({
         </label>
 
         <label className="block">
-          <span className="mb-1 block text-sm text-[var(--muted)]">Description</span>
+          <span className="mb-1 block text-sm text-[var(--muted)]">{t("profile.description")}</span>
           <textarea
             name="description"
             defaultValue={initialDescription}
             rows={4}
-            placeholder="What you do, key services, unique details..."
+            placeholder={t("profile.descriptionPlaceholder")}
             className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 outline-none focus:border-[var(--accent)]"
           />
         </label>
 
         <label className="block">
-          <span className="mb-1 block text-sm text-[var(--muted)]">Main address</span>
+          <span className="mb-1 block text-sm text-[var(--muted)]">{t("profile.mainAddress")}</span>
           <input
             name="address"
             defaultValue={initialAddress}
@@ -133,7 +135,7 @@ export function BusinessProfileEditor({
         </label>
 
         <div className="space-y-2">
-          <p className="text-sm text-[var(--muted)]">Pick map location (click on map)</p>
+          <p className="text-sm text-[var(--muted)]">{t("profile.map.pickHint")}</p>
           <div className="overflow-hidden rounded-xl border border-[var(--border)]">
             <MapContainer center={mapCenter} zoom={13} style={{ height: 280, width: "100%" }}>
               <TileLayer
@@ -146,7 +148,7 @@ export function BusinessProfileEditor({
           <input type="hidden" name="locationLat" value={location?.lat ?? ""} />
           <input type="hidden" name="locationLng" value={location?.lng ?? ""} />
           <label className="block">
-            <span className="mb-1 block text-sm text-[var(--muted)]">Address from point</span>
+            <span className="mb-1 block text-sm text-[var(--muted)]">{t("profile.map.addressFromPoint")}</span>
             <input
               name="locationAddress"
               value={locationAddress}
@@ -157,7 +159,7 @@ export function BusinessProfileEditor({
         </div>
 
         <div className="space-y-3">
-          <p className="text-sm text-[var(--muted)]">Portfolio photos</p>
+          <p className="text-sm text-[var(--muted)]">{t("profile.portfolio.photos")}</p>
           <input
             type="file"
             accept="image/*"
@@ -179,7 +181,7 @@ export function BusinessProfileEditor({
                     onClick={() => setPortfolio((prev) => prev.filter((_, i) => i !== idx))}
                     className="absolute right-1 top-1 rounded bg-black/70 px-1.5 py-0.5 text-xs"
                   >
-                    x
+                    {t("profile.portfolio.remove")}
                   </button>
                 </div>
               ))}
@@ -187,8 +189,8 @@ export function BusinessProfileEditor({
           )}
         </div>
 
-        <div className="flex gap-3">
-          <Submit>Save</Submit>
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <Submit>{t("common.save")}</Submit>
           <button
             type="button"
             onClick={() =>
@@ -199,7 +201,7 @@ export function BusinessProfileEditor({
             disabled={pending}
             className="w-full rounded-xl border border-[var(--border)] py-3 text-sm hover:bg-[var(--surface)] disabled:opacity-50"
           >
-            Preview as client
+            {t("profile.preview")}
           </button>
         </div>
       </form>

@@ -83,7 +83,7 @@ export default async function DashboardPage() {
           href="/dashboard/profile"
           className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-4 text-center font-medium hover:border-[var(--accent)]"
         >
-          Store profile
+          {t("profile.title")}
         </Link>
         <DashboardLinkActions slug={biz.slug} />
       </section>

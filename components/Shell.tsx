@@ -8,8 +8,8 @@ export function Shell({
   action?: React.ReactNode;
 }) {
   return (
-    <div className="mx-auto min-h-dvh max-w-lg px-4 py-8">
-      <header className="mb-8 flex items-start justify-between gap-4">
+    <div className="mx-auto min-h-dvh max-w-lg px-4 py-6 sm:py-8">
+      <header className="mb-6 flex flex-wrap items-start justify-between gap-3 sm:mb-8 sm:gap-4">
         <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
         {action}
       </header>
@@ -52,7 +52,7 @@ export function Submit({ children }: { children: React.ReactNode }) {
   return (
     <button
       type="submit"
-      className="w-full rounded-xl bg-[var(--accent)] py-3 font-medium text-white hover:bg-[var(--accent-hover)]"
+      className="w-full rounded-xl bg-[var(--accent)] py-3 font-medium text-white hover:bg-[var(--accent-hover)] min-h-11"
     >
       {children}
     </button>

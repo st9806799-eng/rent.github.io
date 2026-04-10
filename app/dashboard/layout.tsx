@@ -28,13 +28,13 @@ export default async function DashboardLayout({ children }: { children: React.Re
             {t("dash.nav.analytics")}
           </Link>
           <Link href="/dashboard/profile" className="text-sm text-[var(--muted)] hover:text-[var(--text)]">
-            Profile
+            {t("profile.title")}
           </Link>
           <div className="ml-auto">
             <form action={logoutAction}>
               <button
                 type="submit"
-                className="text-sm text-[var(--muted)] hover:text-[var(--text)]"
+                className="text-sm text-[var(--muted)] hover:text-[var(--text)] min-h-11 px-2 -mx-2 rounded-md"
               >
                 {t("dash.nav.logout")}
               </button>

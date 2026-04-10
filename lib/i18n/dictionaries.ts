@@ -127,6 +127,17 @@ export const ukMessages = {
 
   "common.save": "Зберегти",
 
+  "profile.title": "Профіль магазину",
+  "profile.storeName": "Назва магазину",
+  "profile.description": "Опис",
+  "profile.descriptionPlaceholder": "Чим займаєтесь, послуги, особливості…",
+  "profile.mainAddress": "Основна адреса",
+  "profile.map.pickHint": "Вкажіть точку на карті (натисніть по карті)",
+  "profile.map.addressFromPoint": "Адреса за точкою",
+  "profile.portfolio.photos": "Фото робіт / портфоліо",
+  "profile.portfolio.remove": "×",
+  "profile.preview": "Прев’ю для клієнта",
+
   "business.create.title": "Створіть бізнес",
   "business.create.intro":
     "Один крок — додаємо точку, години за замовчуванням (9–18) і порожній список послуг.",
@@ -281,6 +292,17 @@ export const enMessages: Record<MessageKey, string> = {
   "ownerRow.close": "Close",
 
   "common.save": "Save",
+
+  "profile.title": "Store profile",
+  "profile.storeName": "Store name",
+  "profile.description": "Description",
+  "profile.descriptionPlaceholder": "What you do, key services, unique details…",
+  "profile.mainAddress": "Main address",
+  "profile.map.pickHint": "Pick map location (click on map)",
+  "profile.map.addressFromPoint": "Address from point",
+  "profile.portfolio.photos": "Portfolio photos",
+  "profile.portfolio.remove": "×",
+  "profile.preview": "Preview as client",
 
   "business.create.title": "Create your business",
   "business.create.intro":

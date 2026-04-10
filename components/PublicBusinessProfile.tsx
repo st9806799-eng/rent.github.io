@@ -26,8 +26,8 @@ export function PublicBusinessProfile({
 
       {(address || locationAddress) && (
         <div className="space-y-1 text-sm">
-          {address && <p>Address: {address}</p>}
-          {locationAddress && <p className="text-[var(--muted)]">Map point: {locationAddress}</p>}
+          {address && <p className="text-[var(--muted)]">{address}</p>}
+          {locationAddress && <p className="text-[var(--muted)]">{locationAddress}</p>}
         </div>
       )}
 
