@@ -18,7 +18,6 @@ export function OwnerReservationRow({
   serviceId,
   startIso,
   businessSlug,
-  reservationStatus = "confirmed",
 }: {
   id: string;
   name: string;
@@ -26,7 +25,6 @@ export function OwnerReservationRow({
   serviceId: string;
   startIso: string;
   businessSlug: string;
-  reservationStatus?: string;
 }) {
   const { t, locale } = useI18n();
   const dateLocale = localeToBcp47[locale];
@@ -88,9 +86,6 @@ export function OwnerReservationRow({
           <p className="text-sm text-[var(--muted)]">
             {formatSlot(startIso, dateLocale)} · {serviceName}
           </p>
-          {reservationStatus === "pending_payment" && (
-            <p className="mt-1 text-xs font-medium text-amber-200">{t("ownerRow.pendingPayment")}</p>
-          )}
         </div>
         <div className="flex flex-wrap gap-2">
           <button
@@ -104,7 +99,7 @@ export function OwnerReservationRow({
           <button
             type="button"
             onClick={() => setMoving((m) => !m)}
-            disabled={pending || reservationStatus === "pending_payment"}
+            disabled={pending}
             className="rounded-lg border border-[var(--border)] px-3 py-1.5 text-sm hover:bg-[var(--bg)] disabled:opacity-50"
           >
             {moving ? t("ownerRow.close") : t("ownerRow.move")}

@@ -18,10 +18,7 @@ export default async function ReservationsPage() {
     where: {
       branchId: branch.id,
       endAt: { gte: now },
-      OR: [
-        { status: "confirmed" },
-        { status: "pending_payment", paymentExpiresAt: { gt: now } },
-      ],
+      status: "confirmed",
     },
     orderBy: { startAt: "asc" },
     include: { service: true },
@@ -51,7 +48,6 @@ export default async function ReservationsPage() {
               serviceId={r.serviceId}
               startIso={r.startAt.toISOString()}
               businessSlug={biz.slug}
-              reservationStatus={r.status}
             />
           ))}
         </ul>

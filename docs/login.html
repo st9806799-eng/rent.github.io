@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="uk">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Rent — вхід</title>
+    <link rel="stylesheet" href="assets/styles.css" />
+  </head>
+  <body>
+    <div class="locale-switch">
+      <button type="button" data-lang="uk" aria-pressed="true"><span data-i18n="locale.uk">УК</span></button>
+      <button type="button" data-lang="en" aria-pressed="false"><span data-i18n="locale.en">EN</span></button>
+    </div>
+
+    <div class="shell">
+      <header class="shell-header">
+        <h1 data-i18n="login.title">Вхід</h1>
+      </header>
+
+      <p class="note-box" data-i18n="auth.staticHint"></p>
+
+      <form class="form-stack" id="login-form" style="margin-top: 1rem">
+        <div class="field">
+          <label>
+            <span class="label-text" data-i18n="auth.email">Email</span>
+            <input name="email" type="email" required autocomplete="email" data-i18n-placeholder="auth.email" />
+          </label>
+        </div>
+        <div class="field">
+          <label>
+            <span class="label-text" data-i18n="auth.password">Пароль</span>
+            <input
+              name="password"
+              type="password"
+              required
+              autocomplete="current-password"
+              data-i18n-placeholder="auth.password"
+            />
+          </label>
+        </div>
+        <button type="submit" class="btn btn-primary" data-i18n="login.submit">Продовжити</button>
+      </form>
+
+      <p class="form-footer">
+        <span data-i18n="login.noAccount">Немає акаунта?</span>
+        <a href="register.html" data-i18n="login.register">Реєстрація</a>
+      </p>
+      <p class="form-footer" style="margin-top: 0.5rem">
+        <a href="index.html" data-i18n="nav.home">На головну</a>
+      </p>
+    </div>
+
+    <script src="assets/i18n.js"></script>
+    <script>
+      document.getElementById("login-form").addEventListener("submit", function (e) {
+        e.preventDefault();
+        var lang = window.RentI18n.getLang();
+        alert(
+          lang === "uk"
+            ? "Статична сторінка: серверної авторизації немає."
+            : "Static page: there is no server-side auth."
+        );
+      });
+    </script>
+  </body>
+</html>

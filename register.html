@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="uk">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Rent — реєстрація</title>
+    <link rel="stylesheet" href="assets/css/styles.css" />
+  </head>
+  <body>
+    <div class="locale-switch">
+      <button type="button" data-lang="uk" aria-pressed="true">
+        <span data-i18n="locale.uk">УК</span>
+      </button>
+      <button type="button" data-lang="en" aria-pressed="false">
+        <span data-i18n="locale.en">EN</span>
+      </button>
+    </div>
+
+    <div class="shell">
+      <header class="shell-header">
+        <h1 data-i18n="auth.register.title"></h1>
+      </header>
+
+      <p id="reg-err" class="text-error hidden"></p>
+
+      <form class="form-stack" id="reg-form">
+        <div class="field">
+          <label>
+            <span class="label-text" data-i18n="auth.field.email"></span>
+            <input name="email" type="email" required autocomplete="email" />
+          </label>
+        </div>
+        <div class="field">
+          <label>
+            <span class="label-text" data-i18n="auth.field.password"></span>
+            <input name="password" type="password" required autocomplete="new-password" />
+          </label>
+        </div>
+        <label class="field" style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer">
+          <input type="checkbox" name="admin" id="reg-admin" />
+          <span class="label-text" style="margin: 0" data-i18n="auth.adminAccount"></span>
+        </label>
+        <button type="submit" class="btn btn-primary" data-i18n="auth.register.submit"></button>
+      </form>
+
+      <p class="form-footer">
+        <span data-i18n="auth.register.haveAccount"></span>
+        <a href="login.html" data-i18n="auth.register.signIn"></a>
+      </p>
+      <p class="form-footer" style="margin-top: 0.5rem">
+        <a href="index.html" data-i18n="nav.home"></a>
+      </p>
+    </div>
+
+    <script src="assets/js/rent-i18n.js"></script>
+    <script src="assets/js/rent-crypto.js"></script>
+    <script src="assets/js/rent-slots.js"></script>
+    <script src="assets/js/rent-format.js"></script>
+    <script src="assets/js/rent-db.js"></script>
+    <script src="assets/js/rent-auth.js"></script>
+    <script>
+      document.getElementById("reg-form").addEventListener("submit", function (e) {
+        e.preventDefault();
+        var err = document.getElementById("reg-err");
+        err.classList.add("hidden");
+        var fd = new FormData(e.target);
+        var asAdmin = document.getElementById("reg-admin").checked;
+        RentAuth.register(fd.get("email"), fd.get("password"), asAdmin).then(function (r) {
+          if (r.error === "exists") {
+            err.textContent = RentI18n.t(RentI18n.getLang(), "auth.error.exists");
+            err.classList.remove("hidden");
+            return;
+          }
+          if (r.user.role === "ADMIN") location.href = "admin/index.html";
+          else location.href = "business/create.html";
+        });
+      });
+    </script>
+  </body>
+</html>

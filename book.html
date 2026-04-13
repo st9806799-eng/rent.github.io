@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="uk">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Rent — бронювання</title>
+    <link rel="stylesheet" href="assets/css/styles.css" />
+  </head>
+  <body>
+    <div class="locale-switch">
+      <button type="button" data-lang="uk" aria-pressed="true">
+        <span data-i18n="locale.uk">УК</span>
+      </button>
+      <button type="button" data-lang="en" aria-pressed="false">
+        <span data-i18n="locale.en">EN</span>
+      </button>
+    </div>
+
+    <div class="shell">
+      <p id="book-error-slug" class="note-box hidden" data-i18n="booking.slugMissing"></p>
+      <p id="book-error-404" class="note-box hidden" data-i18n="booking.notFound"></p>
+
+      <div id="book-main" class="hidden">
+        <p class="booking-tagline" data-i18n="booking.tagline"></p>
+
+        <div id="step-existing" class="card hidden">
+          <h2 data-i18n="booking.reservation.title"></h2>
+          <div id="existing-body"></div>
+          <button type="button" class="btn btn-secondary" style="margin-top: 1rem" id="existing-cancel" data-i18n="booking.cancel"></button>
+          <button type="button" class="btn btn-primary" style="margin-top: 0.5rem" id="btn-new-booking" data-i18n="booking.newBooking"></button>
+        </div>
+
+        <div id="step-services" class="card hidden">
+          <h2 data-i18n="booking.servicesTitle"></h2>
+          <div class="service-list" id="service-list"></div>
+        </div>
+
+        <div id="step-day" class="card hidden">
+          <button type="button" class="back-link" id="back-to-services" data-i18n="booking.back"></button>
+          <h2 data-i18n="booking.pickDay"></h2>
+          <div class="day-chips" id="day-chips"></div>
+        </div>
+
+        <div id="step-times" class="card hidden">
+          <button type="button" class="back-link" id="back-to-day" data-i18n="booking.back"></button>
+          <h2 data-i18n="booking.pickTime"></h2>
+          <div class="slot-grid" id="slot-grid"></div>
+        </div>
+
+        <div id="step-details" class="card hidden">
+          <button type="button" class="back-link" id="back-to-times" data-i18n="booking.back"></button>
+          <h2 data-i18n="booking.almostThere"></h2>
+          <form class="form-stack" id="booking-form">
+            <div class="field">
+              <label>
+                <span class="label-text" data-i18n="booking.label.name"></span>
+                <input id="bf-name" name="name" type="text" required />
+              </label>
+            </div>
+            <div class="field">
+              <label>
+                <span class="label-text" data-i18n="booking.label.phone"></span>
+                <input id="bf-phone" name="phone" type="tel" required />
+              </label>
+            </div>
+            <button type="submit" class="btn btn-primary" data-i18n="booking.book.submit"></button>
+          </form>
+        </div>
+
+        <div id="step-success" class="card hidden">
+          <div class="success-icon" aria-hidden="true">✓</div>
+          <h2 style="text-align: center" data-i18n="booking.success.title"></h2>
+          <p class="subtitle" style="text-align: center" data-i18n="booking.success.saved"></p>
+          <p class="form-footer" style="margin-top: 1.5rem">
+            <a href="index.html" data-i18n="nav.home"></a>
+          </p>
+        </div>
+
+        <section class="profile-section">
+          <div class="profile-card">
+            <h2 id="profile-title"></h2>
+            <p id="profile-desc"></p>
+            <p id="profile-address"></p>
+            <div id="profile-map-wrap" class="hidden map-frame">
+              <iframe id="profile-map" title="Map"></iframe>
+            </div>
+            <div id="profile-portfolio"></div>
+          </div>
+        </section>
+
+        <div class="card" style="margin-top: 1rem">
+          <p class="subtitle" data-i18n="booking.footer.lookupTitle"></p>
+          <form class="form-stack" id="lookup-form" style="margin-top: 0.75rem">
+            <div class="field">
+              <input
+                id="lookup-phone"
+                type="tel"
+                name="phone"
+                data-i18n-placeholder="booking.footer.phonePlaceholder"
+              />
+            </div>
+            <button type="submit" class="btn btn-secondary" data-i18n="booking.footer.find"></button>
+          </form>
+          <p id="lookup-err" class="text-error"></p>
+        </div>
+      </div>
+    </div>
+
+    <script src="assets/js/rent-i18n.js"></script>
+    <script src="assets/js/rent-crypto.js"></script>
+    <script src="assets/js/rent-slots.js"></script>
+    <script src="assets/js/rent-format.js"></script>
+    <script src="assets/js/rent-db.js"></script>
+    <script src="assets/js/rent-auth.js"></script>
+    <script src="assets/js/rent-nav.js"></script>
+    <script src="assets/js/rent-book.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        RentBook.init();
+      });
+    </script>
+  </body>
+</html>

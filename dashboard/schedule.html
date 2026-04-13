@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="uk">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Rent — розклад</title>
+    <link rel="stylesheet" href="../assets/css/styles.css" />
+  </head>
+  <body>
+    <div class="locale-switch">
+      <button type="button" data-lang="uk" aria-pressed="true">
+        <span data-i18n="locale.uk">УК</span>
+      </button>
+      <button type="button" data-lang="en" aria-pressed="false">
+        <span data-i18n="locale.en">EN</span>
+      </button>
+    </div>
+    <div id="dash-nav"></div>
+    <div class="page-body">
+      <header style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem; margin-bottom: 1.5rem">
+        <div>
+          <h1 style="font-size: 1.5rem; font-weight: 600; margin: 0" data-i18n="schedule.title"></h1>
+          <p class="subtitle" data-i18n="schedule.subtitle"></p>
+        </div>
+        <a href="index.html" class="subtitle" style="align-self: center" data-i18n="dash.back"></a>
+      </header>
+      <p id="sch-err" class="text-error hidden"></p>
+      <form id="schedule-form" class="form-stack">
+        <ul class="list-plain" id="schedule-rows" style="margin-bottom: 1rem"></ul>
+        <button type="submit" class="btn btn-primary" data-i18n="common.save"></button>
+      </form>
+    </div>
+    <script src="../assets/js/rent-i18n.js"></script>
+    <script src="../assets/js/rent-crypto.js"></script>
+    <script src="../assets/js/rent-slots.js"></script>
+    <script src="../assets/js/rent-format.js"></script>
+    <script src="../assets/js/rent-db.js"></script>
+    <script src="../assets/js/rent-auth.js"></script>
+    <script src="../assets/js/rent-nav.js"></script>
+    <script>
+      (function () {
+        var u = RentAuth.requireOwner("../login.html");
+        if (!u) return;
+        var biz = RentDB.getPrimaryBusiness(u.id);
+        if (!biz) {
+          location.href = "../business/create.html";
+          return;
+        }
+        RentNav.renderDashNav(document.getElementById("dash-nav"), {
+          businessName: biz.name,
+          active: "",
+        });
+        var hours = RentDB.getHours(biz.id);
+        var byD = {};
+        hours.forEach(function (h) {
+          byD[h.dayOfWeek] = h;
+        });
+        var ul = document.getElementById("schedule-rows");
+        for (var d = 0; d < 7; d++) {
+          var row = byD[d] || {
+            dayOfWeek: d,
+            isOpen: true,
+            openTime: "09:00",
+            closeTime: "18:00",
+          };
+          var li = document.createElement("li");
+          li.className = "schedule-row";
+          var key = "schedule.day" + d;
+          li.innerHTML =
+            '<label><input type="checkbox" name="on_' +
+            d +
+            '" value="on" ' +
+            (row.isOpen ? "checked" : "") +
+            '/> <span data-i18n="' +
+            key +
+            '"></span></label>' +
+            '<input type="time" name="open_' +
+            d +
+            '" value="' +
+            row.openTime +
+            '" />' +
+            '<span class="subtitle">–</span>' +
+            '<input type="time" name="close_' +
+            d +
+            '" value="' +
+            row.closeTime +
+            '" />';
+          ul.appendChild(li);
+        }
+        RentI18n.apply(RentI18n.getLang());
+        document.getElementById("schedule-form").addEventListener("submit", function (e) {
+          e.preventDefault();
+          var err = document.getElementById("sch-err");
+          err.classList.add("hidden");
+          var rows = [];
+          for (var d = 0; d < 7; d++) {
+            var on = e.target.querySelector('[name="on_' + d + '"]');
+            rows.push({
+              dayOfWeek: d,
+              isOpen: !!(on && on.checked),
+              openTime: e.target.querySelector('[name="open_' + d + '"]').value || "09:00",
+              closeTime: e.target.querySelector('[name="close_' + d + '"]').value || "18:00",
+            });
+          }
+          RentDB.setHours(biz.id, rows);
+        });
+      })();
+    </script>
+  </body>
+</html>

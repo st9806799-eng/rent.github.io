@@ -6,12 +6,6 @@ export const ukMessages = {
   "booking.error.failed": "Помилка",
   "booking.error.lookupFailed": "Немає активного бронювання на цей телефон.",
   "booking.reservation.title": "Ваше бронювання",
-  "booking.pendingPayment.title": "Очікується оплата утримання",
-  "booking.pendingPayment.detail":
-    "(контроль картки). Після успішної оплати бронь стане підтвердженою.",
-  "booking.pendingPayment.payBy": "Час на оплату до:",
-  "booking.liqpay.setupError":
-    "Не вдалося підготувати оплату. Перевірте NEXT_PUBLIC_APP_URL у налаштуваннях сайту або скасуйте бронь і спробуйте знову.",
   "booking.confirmBooking": "Підтвердити бронювання",
   "booking.changeTime": "Змінити час",
   "booking.cancel": "Скасувати",
@@ -24,18 +18,12 @@ export const ukMessages = {
   "booking.almostThere": "Майже готово",
   "booking.label.name": "Ім’я",
   "booking.label.phone": "Телефон",
-  "booking.book.payLiqpay": "Далі — оплата утримання в LiqPay",
-  "booking.book.payMonobank": "Забронювати — оплата в Monobank",
   "booking.book.submit": "Забронювати",
-  "booking.payment.title": "Оплата утримання",
-  "booking.payment.description":
-    "Одноразове списання утримання для підтвердження броні. Після оплати поверніться на цю сторінку — з’явиться підтверджена бронь.",
-  "booking.payment.paidRefresh": "Я вже оплатив — оновити сторінку",
   "booking.success.title": "Бронь підтверджено",
   "booking.success.saved":
     "Ми зберегли час. Поверніться на цю сторінку пізніше — зможете змінити або скасувати бронь.",
   "booking.success.telegramHint":
-    "Натисніть кнопку нижче: спочатку з’явиться нагадування про оплату 1 ₴ у Monobank, потім зможете відкрити Telegram — там надійде підтвердження броні і ввімкнуться нагадування за ~24 год до візиту.",
+    "Натисніть кнопку нижче, щоб відкрити Telegram-бота — там можна увімкнути нагадування приблизно за 24 год до візиту.",
   "booking.done": "Готово",
   "booking.reschedule.newTime": "Новий час",
   "booking.footer.lookupTitle": "Уже є бронювання?",
@@ -43,13 +31,9 @@ export const ukMessages = {
   "booking.footer.find": "Знайти",
   "booking.modal.title": "Підтвердження бронювання",
   "booking.modal.body":
-    "Бронювання вважається остаточно підтвердженим лише після переказу 1 ₴ (перевірка, що ви не бот) на банку Monobank. Спочатку здійсніть оплату за посиланням нижче, потім відкрийте Telegram.",
-  "booking.modal.openMonobank": "Відкрити банку Monobank — 1 ₴",
-  "booking.modal.openTelegram": "Далі — відкрити Telegram",
+    "Відкрийте Telegram-бота за посиланням нижче, щоб отримати підтвердження та увімкнути нагадування перед візитом.",
+  "booking.modal.openTelegram": "Відкрити Telegram",
   "booking.modal.close": "Закрити",
-  "booking.liqpay.hint":
-    "Натисніть кнопку — відкриється LiqPay у новій вкладці. Після оплати поверніться сюди.",
-  "booking.liqpay.pay": "Оплатити в LiqPay",
   "booking.durationFmt": "{{n}} хв ·",
 
   "home.title": "Rent",
@@ -120,7 +104,6 @@ export const ukMessages = {
   "serviceNew.placeholder.price": "25.00",
   "serviceNew.hint": "Збережені послуги одразу доступні для броню на публічній сторінці.",
 
-  "ownerRow.pendingPayment": "Очікує оплату утримання",
   "ownerRow.cancel": "Скасувати",
   "ownerRow.move": "Перенести",
   "ownerRow.close": "Закрити",
@@ -174,12 +157,6 @@ export const enMessages: Record<MessageKey, string> = {
   "booking.error.failed": "Something went wrong",
   "booking.error.lookupFailed": "No active reservation for this phone.",
   "booking.reservation.title": "Your reservation",
-  "booking.pendingPayment.title": "Awaiting hold payment",
-  "booking.pendingPayment.detail":
-    "(card check). After successful payment your booking will be confirmed.",
-  "booking.pendingPayment.payBy": "Pay by:",
-  "booking.liqpay.setupError":
-    "Could not prepare payment. Check NEXT_PUBLIC_APP_URL in site settings or cancel and try again.",
   "booking.confirmBooking": "Confirm booking",
   "booking.changeTime": "Change time",
   "booking.cancel": "Cancel",
@@ -192,18 +169,12 @@ export const enMessages: Record<MessageKey, string> = {
   "booking.almostThere": "Almost there",
   "booking.label.name": "Name",
   "booking.label.phone": "Phone",
-  "booking.book.payLiqpay": "Next — pay hold in LiqPay",
-  "booking.book.payMonobank": "Book — pay in Monobank",
   "booking.book.submit": "Book",
-  "booking.payment.title": "Hold payment",
-  "booking.payment.description":
-    "One-time hold to confirm your booking. After paying, return here — your booking will show as confirmed.",
-  "booking.payment.paidRefresh": "I’ve paid — refresh page",
   "booking.success.title": "Booking confirmed",
   "booking.success.saved":
     "We saved your slot. Come back later to reschedule or cancel.",
   "booking.success.telegramHint":
-    "Tap the button below: you’ll first see a reminder to pay 1 UAH in Monobank, then you can open Telegram — there you’ll get booking confirmation and reminders ~24h before your visit.",
+    "Tap the button below to open the Telegram bot — you can enable reminders about 24 hours before your visit.",
   "booking.done": "Done",
   "booking.reschedule.newTime": "New time",
   "booking.footer.lookupTitle": "Already booked?",
@@ -211,13 +182,9 @@ export const enMessages: Record<MessageKey, string> = {
   "booking.footer.find": "Find",
   "booking.modal.title": "Confirm booking",
   "booking.modal.body":
-    "Your booking is considered fully confirmed only after sending 1 UAH (anti-bot check) to Monobank. Pay using the link below first, then open Telegram.",
-  "booking.modal.openMonobank": "Open Monobank jar — 1 UAH",
-  "booking.modal.openTelegram": "Next — open Telegram",
+    "Open the Telegram bot using the link below to get confirmation and enable reminders before your visit.",
+  "booking.modal.openTelegram": "Open Telegram",
   "booking.modal.close": "Close",
-  "booking.liqpay.hint":
-    "Tap the button — LiqPay opens in a new tab. After paying, return here.",
-  "booking.liqpay.pay": "Pay in LiqPay",
   "booking.durationFmt": "{{n}} min ·",
 
   "home.title": "Rent",
@@ -286,7 +253,6 @@ export const enMessages: Record<MessageKey, string> = {
   "serviceNew.placeholder.price": "25.00",
   "serviceNew.hint": "Saved services are immediately bookable on your public page.",
 
-  "ownerRow.pendingPayment": "Awaiting hold payment",
   "ownerRow.cancel": "Cancel",
   "ownerRow.move": "Move",
   "ownerRow.close": "Close",

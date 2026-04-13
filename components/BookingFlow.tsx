@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { useCallback, useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   bookAction,
@@ -8,22 +8,16 @@ import {
   clientRescheduleAction,
   getAvailableSlotsAction,
   rememberClientPhoneAction,
-  type BookActionResult,
 } from "@/app/actions/reservation";
 import { formatPrice, formatSlot } from "@/lib/format";
-import { monobankJarPaymentUrl } from "@/lib/monobank-jar";
 import { useI18n } from "@/components/I18nProvider";
 import { localeToBcp47 } from "@/lib/i18n/config";
 
-const LIQPAY_CHECKOUT_URL = "https://www.liqpay.ua/api/3/checkout";
-
-function TelegramMonobankGateModal({
+function TelegramReminderModal({
   telegramUrl,
-  jarUrl,
   onClose,
 }: {
   telegramUrl: string;
-  jarUrl: string;
   onClose: () => void;
 }) {
   const { t } = useI18n();
@@ -36,27 +30,19 @@ function TelegramMonobankGateModal({
       <div
         role="dialog"
         aria-modal="true"
-        aria-labelledby="tg-monobank-gate-title"
+        aria-labelledby="tg-reminder-gate-title"
         className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-2xl border border-[var(--border)] bg-[var(--surface)] p-5 shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 id="tg-monobank-gate-title" className="text-lg font-semibold">
+        <h2 id="tg-reminder-gate-title" className="text-lg font-semibold">
           {t("booking.modal.title")}
         </h2>
         <p className="mt-3 text-sm text-[var(--muted)] leading-relaxed">{t("booking.modal.body")}</p>
         <a
-          href={jarUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-4 flex w-full justify-center rounded-xl bg-[var(--accent)] py-3 text-sm font-medium text-white hover:bg-[var(--accent-hover)]"
-        >
-          {t("booking.modal.openMonobank")}
-        </a>
-        <a
           href={telegramUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="mt-2 flex w-full justify-center rounded-xl border border-[var(--accent)] py-3 text-sm font-medium text-[var(--accent)] hover:bg-[var(--accent)]/10"
+          className="mt-4 flex w-full justify-center rounded-xl bg-[var(--accent)] py-3 text-sm font-medium text-white hover:bg-[var(--accent-hover)]"
         >
           {t("booking.modal.openTelegram")}
         </a>
@@ -69,24 +55,6 @@ function TelegramMonobankGateModal({
         </button>
       </div>
     </div>
-  );
-}
-
-function LiqPayRedirectForm({ data, signature }: { data: string; signature: string }) {
-  const ref = useRef<HTMLFormElement>(null);
-  const { t } = useI18n();
-  return (
-    <form ref={ref} method="POST" action={LIQPAY_CHECKOUT_URL} className="space-y-3" target="_blank">
-      <input type="hidden" name="data" value={data} />
-      <input type="hidden" name="signature" value={signature} />
-      <p className="text-sm text-[var(--muted)]">{t("booking.liqpay.hint")}</p>
-      <button
-        type="submit"
-        className="w-full rounded-xl bg-[var(--accent)] py-3 font-medium text-white hover:bg-[var(--accent-hover)]"
-      >
-        {t("booking.liqpay.pay")}
-      </button>
-    </form>
   );
 }
 
@@ -106,32 +74,18 @@ export type ExistingReservation = {
   endIso: string;
   /** Посилання на бота для нагадування, якщо ще не підключено */
   telegramReminderUrl: string | null;
-  bookingStatus?: "confirmed" | "pending_payment";
-  paymentExpiresAtIso?: string | null;
-  liqpayData?: string | null;
-  liqpaySignature?: string | null;
 };
 
-type View =
-  | "home"
-  | "services"
-  | "times"
-  | "details"
-  | "success"
-  | "payment"
-  | "rescheduleTimes";
+type View = "home" | "services" | "times" | "details" | "success" | "rescheduleTimes";
 
 export function BookingFlow({
   businessName,
   slug,
-  paymentProvider = null,
   services,
   existing,
 }: {
   businessName: string;
   slug: string;
-  /** Monobank — редірект на оплату; LiqPay — форма утримання з підтвердженням по callback */
-  paymentProvider?: "monobank" | "liqpay" | null;
   services: BookingService[];
   existing: ExistingReservation | null;
 }) {
@@ -146,13 +100,10 @@ export function BookingFlow({
   const [clientPhone, setClientPhone] = useState("");
   const [lookupPhone, setLookupPhone] = useState("");
   const [tgReminderUrl, setTgReminderUrl] = useState<string | null>(null);
-  const [payData, setPayData] = useState<string | null>(null);
-  const [paySig, setPaySig] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [pending, start] = useTransition();
   const afterPhoneLookup = useRef(false);
-  const [tgGateTelegramUrl, setTgGateTelegramUrl] = useState<string | null>(null);
-  const monobankJarUrl = useMemo(() => monobankJarPaymentUrl(), []);
+  const [tgModalUrl, setTgModalUrl] = useState<string | null>(null);
 
   useEffect(() => {
     if (afterPhoneLookup.current && existing) {
@@ -163,7 +114,6 @@ export function BookingFlow({
 
   useEffect(() => {
     if (existing && view === "home") return;
-    if (view === "payment") return;
     if (!serviceId) return;
     if (view !== "times" && view !== "rescheduleTimes") return;
     let cancelled = false;
@@ -189,18 +139,15 @@ export function BookingFlow({
   }, [existing]);
 
   useEffect(() => {
-    if (!tgGateTelegramUrl) return;
+    if (!tgModalUrl) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setTgGateTelegramUrl(null);
+      if (e.key === "Escape") setTgModalUrl(null);
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [tgGateTelegramUrl]);
+  }, [tgModalUrl]);
 
-  const selectedService = useMemo(
-    () => services.find((s) => s.id === serviceId) ?? null,
-    [services, serviceId]
-  );
+  const selectedService = services.find((s) => s.id === serviceId) ?? null;
 
   const goBookAnother = useCallback(() => {
     setErr(null);
@@ -228,24 +175,13 @@ export function BookingFlow({
     setErr(null);
     start(async () => {
       try {
-        const out: BookActionResult = await bookAction({
+        const out = await bookAction({
           businessSlug: slug,
           serviceId,
           startIso,
           clientName,
           clientPhone,
         });
-        if (out.kind === "redirect_monobank") {
-          window.location.assign(out.pageUrl);
-          return;
-        }
-        if (out.kind === "needs_payment") {
-          setPayData(out.liqpayData);
-          setPaySig(out.liqpaySignature);
-          setView("payment");
-          router.refresh();
-          return;
-        }
         setTgReminderUrl(out.telegramReminderUrl);
         setView("success");
         router.refresh();
@@ -323,29 +259,10 @@ export function BookingFlow({
           <p className="text-[var(--muted)]">{existing.serviceName}</p>
           <p className="text-lg">{formatSlot(existing.startIso, dateLocale)}</p>
           <p className="text-sm text-[var(--muted)]">{existing.clientName}</p>
-          {existing.bookingStatus === "pending_payment" && (
-            <div className="rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-sm text-amber-100">
-              <strong>{t("booking.pendingPayment.title")}</strong> {t("booking.pendingPayment.detail")}
-              {existing.paymentExpiresAtIso && (
-                <span className="mt-1 block text-xs text-[var(--muted)]">
-                  {t("booking.pendingPayment.payBy")} {formatSlot(existing.paymentExpiresAtIso, dateLocale)}
-                </span>
-              )}
-            </div>
-          )}
-          {existing.bookingStatus === "pending_payment" &&
-            existing.liqpayData &&
-            existing.liqpaySignature && (
-              <LiqPayRedirectForm data={existing.liqpayData} signature={existing.liqpaySignature} />
-            )}
-          {existing.bookingStatus === "pending_payment" &&
-            (!existing.liqpayData || !existing.liqpaySignature) && (
-              <p className="text-sm text-red-300">{t("booking.liqpay.setupError")}</p>
-            )}
           {existing.telegramReminderUrl && (
             <button
               type="button"
-              onClick={() => setTgGateTelegramUrl(existing.telegramReminderUrl)}
+              onClick={() => setTgModalUrl(existing.telegramReminderUrl)}
               className="inline-flex w-full justify-center rounded-lg border border-[var(--accent)] py-2 text-sm font-medium text-[var(--accent)] hover:bg-[var(--accent)]/10"
             >
               {t("booking.confirmBooking")}
@@ -354,7 +271,7 @@ export function BookingFlow({
           <div className="flex flex-wrap gap-2 pt-2">
             <button
               type="button"
-              disabled={pending || existing.bookingStatus === "pending_payment"}
+              disabled={pending}
               onClick={openReschedule}
               className="rounded-lg bg-[var(--accent)] px-4 py-2 text-sm font-medium text-white hover:bg-[var(--accent-hover)] disabled:opacity-50"
             >
@@ -480,29 +397,7 @@ export function BookingFlow({
             onClick={submitBook}
             className="w-full rounded-xl bg-[var(--accent)] py-3 font-medium text-white hover:bg-[var(--accent-hover)] disabled:opacity-50"
           >
-            {paymentProvider === "liqpay"
-              ? t("booking.book.payLiqpay")
-              : paymentProvider === "monobank"
-                ? t("booking.book.payMonobank")
-                : t("booking.book.submit")}
-          </button>
-        </section>
-      )}
-
-      {view === "payment" && payData && paySig && (
-        <section className="space-y-4 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4">
-          <h2 className="text-lg font-medium">{t("booking.payment.title")}</h2>
-          <p className="text-sm text-[var(--muted)]">{t("booking.payment.description")}</p>
-          <LiqPayRedirectForm data={payData} signature={paySig} />
-          <button
-            type="button"
-            onClick={() => {
-              router.refresh();
-              setView("home");
-            }}
-            className="w-full rounded-xl border border-[var(--border)] py-3 text-sm hover:bg-[var(--bg)]"
-          >
-            {t("booking.payment.paidRefresh")}
+            {t("booking.book.submit")}
           </button>
         </section>
       )}
@@ -516,7 +411,7 @@ export function BookingFlow({
               <p className="text-sm text-[var(--muted)]">{t("booking.success.telegramHint")}</p>
               <button
                 type="button"
-                onClick={() => setTgGateTelegramUrl(tgReminderUrl)}
+                onClick={() => setTgModalUrl(tgReminderUrl)}
                 className="flex w-full justify-center rounded-xl border border-[var(--accent)] py-3 font-medium text-[var(--accent)] hover:bg-[var(--accent)]/10"
               >
                 {t("booking.confirmBooking")}
@@ -569,13 +464,7 @@ export function BookingFlow({
         </section>
       )}
 
-      {tgGateTelegramUrl && (
-        <TelegramMonobankGateModal
-          telegramUrl={tgGateTelegramUrl}
-          jarUrl={monobankJarUrl}
-          onClose={() => setTgGateTelegramUrl(null)}
-        />
-      )}
+      {tgModalUrl && <TelegramReminderModal telegramUrl={tgModalUrl} onClose={() => setTgModalUrl(null)} />}
 
       <footer className="mt-12 border-t border-[var(--border)] pt-6">
         <p className="mb-2 text-sm text-[var(--muted)]">{t("booking.footer.lookupTitle")}</p>

@@ -45,18 +45,9 @@ export async function GET(req: NextRequest) {
     }
   }
 
-  const expired = await prisma.reservation.updateMany({
-    where: {
-      status: "pending_payment",
-      paymentExpiresAt: { lt: new Date() },
-    },
-    data: { status: "cancelled" },
-  });
-
   return NextResponse.json({
     ok: true,
     checked: rows.length,
     sent,
-    expiredPendingPayments: expired.count,
   });
 }

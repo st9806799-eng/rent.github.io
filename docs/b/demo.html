@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="uk">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Rent — демо бронювання</title>
+    <link rel="stylesheet" href="../assets/styles.css" />
+  </head>
+  <body>
+    <div class="locale-switch">
+      <button type="button" data-lang="uk" aria-pressed="true"><span data-i18n="locale.uk">УК</span></button>
+      <button type="button" data-lang="en" aria-pressed="false"><span data-i18n="locale.en">EN</span></button>
+    </div>
+
+    <div class="shell">
+      <p class="booking-tagline" data-i18n="booking.tagline">Забронюйте за кілька кроків</p>
+
+      <div id="step-services" class="card">
+        <h2 data-i18n="booking.services">Послуги</h2>
+        <div class="service-list">
+          <button type="button" class="service-btn" data-service="s1" data-i18n="booking.s1"></button>
+          <button type="button" class="service-btn" data-service="s2" data-i18n="booking.s2"></button>
+        </div>
+      </div>
+
+      <div id="step-times" class="card hidden">
+        <button type="button" class="back-link" id="back-to-services" data-i18n="booking.back"></button>
+        <h2 data-i18n="booking.pickTime">Оберіть час</h2>
+        <div class="slot-grid" id="slot-grid"></div>
+      </div>
+
+      <div id="step-details" class="card hidden">
+        <button type="button" class="back-link" id="back-to-times" data-i18n="booking.back"></button>
+        <h2 data-i18n="booking.almost">Майже готово</h2>
+        <form class="form-stack" id="booking-form">
+          <div class="field">
+            <label>
+              <span class="label-text" data-i18n="booking.name">Ім’я</span>
+              <input name="name" type="text" required data-i18n-placeholder="booking.name" />
+            </label>
+          </div>
+          <div class="field">
+            <label>
+              <span class="label-text" data-i18n="booking.phone">Телефон</span>
+              <input name="phone" type="tel" required data-i18n-placeholder="booking.phone" />
+            </label>
+          </div>
+          <button type="submit" class="btn btn-primary" data-i18n="booking.submit">Забронювати</button>
+        </form>
+      </div>
+
+      <div id="step-success" class="card hidden">
+        <div class="success-icon" aria-hidden="true">✓</div>
+        <h2 style="text-align: center" data-i18n="booking.success"></h2>
+        <p class="subtitle" style="text-align: center" data-i18n="booking.successText"></p>
+        <p class="form-footer" style="margin-top: 1.5rem">
+          <a href="../index.html" data-i18n="nav.home">На головну</a>
+        </p>
+      </div>
+
+      <section class="profile-section">
+        <div class="profile-card">
+          <h2 data-i18n="booking.demoBiz">Демо-салон</h2>
+          <p data-i18n="booking.demoDesc"></p>
+        </div>
+      </section>
+    </div>
+
+    <script src="../assets/i18n.js"></script>
+    <script src="../assets/booking-demo.js"></script>
+  </body>
+</html>

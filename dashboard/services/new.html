@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="uk">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Rent — послуга</title>
+    <link rel="stylesheet" href="../assets/css/styles.css" />
+  </head>
+  <body>
+    <div class="locale-switch">
+      <button type="button" data-lang="uk" aria-pressed="true">
+        <span data-i18n="locale.uk">УК</span>
+      </button>
+      <button type="button" data-lang="en" aria-pressed="false">
+        <span data-i18n="locale.en">EN</span>
+      </button>
+    </div>
+    <div id="dash-nav"></div>
+    <div class="page-body">
+      <header style="margin-bottom: 1.5rem">
+        <a href="../index.html" class="subtitle" data-i18n="dash.back"></a>
+        <h1 style="font-size: 1.5rem; font-weight: 600; margin: 0.5rem 0 0" data-i18n="serviceNew.title"></h1>
+        <p class="subtitle" data-i18n="serviceNew.hint"></p>
+      </header>
+      <form id="svc-form" class="form-stack">
+        <div class="field">
+          <label>
+            <span class="label-text" data-i18n="serviceNew.name"></span>
+            <input name="name" required data-i18n-placeholder="serviceNew.placeholder.name" />
+          </label>
+        </div>
+        <div class="field">
+          <label>
+            <span class="label-text" data-i18n="serviceNew.duration"></span>
+            <input name="duration" type="number" min="5" value="45" required />
+          </label>
+        </div>
+        <div class="field">
+          <label>
+            <span class="label-text" data-i18n="serviceNew.price"></span>
+            <input name="price" data-i18n-placeholder="serviceNew.placeholder.price" />
+          </label>
+        </div>
+        <button type="submit" class="btn btn-primary" data-i18n="serviceNew.submit"></button>
+      </form>
+    </div>
+    <script src="../../assets/js/rent-i18n.js"></script>
+    <script src="../../assets/js/rent-crypto.js"></script>
+    <script src="../../assets/js/rent-slots.js"></script>
+    <script src="../../assets/js/rent-format.js"></script>
+    <script src="../../assets/js/rent-db.js"></script>
+    <script src="../../assets/js/rent-auth.js"></script>
+    <script src="../../assets/js/rent-nav.js"></script>
+    <script>
+      (function () {
+        var u = RentAuth.requireOwner("../../login.html");
+        if (!u) return;
+        var biz = RentDB.getPrimaryBusiness(u.id);
+        if (!biz) {
+          location.href = "../../business/create.html";
+          return;
+        }
+        RentNav.renderDashNav(document.getElementById("dash-nav"), {
+          businessName: biz.name,
+          active: "",
+          pathPrefix: "../",
+        });
+        document.getElementById("svc-form").addEventListener("submit", function (e) {
+          e.preventDefault();
+          var fd = new FormData(e.target);
+          RentDB.addService(biz.id, fd.get("name"), fd.get("duration"), fd.get("price"));
+          location.href = "../index.html";
+        });
+      })();
+    </script>
+  </body>
+</html>

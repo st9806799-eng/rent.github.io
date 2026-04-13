@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="uk">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Rent — кабінет</title>
+    <link rel="stylesheet" href="../assets/css/styles.css" />
+  </head>
+  <body>
+    <div class="locale-switch">
+      <button type="button" data-lang="uk" aria-pressed="true">
+        <span data-i18n="locale.uk">УК</span>
+      </button>
+      <button type="button" data-lang="en" aria-pressed="false">
+        <span data-i18n="locale.en">EN</span>
+      </button>
+    </div>
+
+    <div id="dash-nav"></div>
+
+    <div class="page-body">
+      <header>
+        <h1 class="text-2xl" style="font-size: 1.5rem; font-weight: 600" data-i18n="dash.today.title"></h1>
+        <p class="subtitle" id="dash-count"></p>
+      </header>
+
+      <section style="margin-top: 2rem">
+        <ul class="list-plain" id="today-list"></ul>
+        <p id="today-empty" class="subtitle hidden" style="padding: 2rem; text-align: center; border: 1px dashed var(--border); border-radius: 0.75rem" data-i18n="dash.today.empty"></p>
+      </section>
+
+      <section class="tile-grid" style="margin-top: 2.5rem">
+        <a href="services/new.html" class="tile" data-i18n="dash.link.addService"></a>
+        <a href="schedule.html" class="tile" data-i18n="dash.link.schedule"></a>
+        <a href="profile.html" class="tile" data-i18n="profile.title"></a>
+        <span class="tile" style="cursor: default">
+          <button
+            type="button"
+            class="btn btn-secondary btn-sm"
+            style="margin-top: 0; width: 100%"
+            id="btn-copy"
+            data-i18n="dash.copy.link"
+          ></button>
+          <a
+            class="btn btn-secondary btn-sm"
+            style="margin-top: 0.5rem; width: 100%; display: inline-block"
+            id="btn-qr"
+            href="#"
+            download="booking-qr.png"
+            data-i18n="dash.copy.qr"
+          ></a>
+        </span>
+      </section>
+
+      <section class="card" style="margin-top: 2rem">
+        <h2 style="font-size: 1.125rem; margin: 0 0 0.5rem" data-i18n="telegram.title"></h2>
+        <p class="subtitle" data-i18n="telegram.static"></p>
+        <form class="form-stack" style="margin-top: 1rem" id="tg-form">
+          <div class="field">
+            <label>
+              <span class="label-text" data-i18n="telegram.field.chatId"></span>
+              <input id="tg-chat" type="text" name="chatId" />
+            </label>
+          </div>
+          <button type="submit" class="btn btn-primary" data-i18n="common.save"></button>
+        </form>
+      </section>
+    </div>
+
+    <script src="../assets/js/rent-i18n.js"></script>
+    <script src="../assets/js/rent-crypto.js"></script>
+    <script src="../assets/js/rent-slots.js"></script>
+    <script src="../assets/js/rent-format.js"></script>
+    <script src="../assets/js/rent-db.js"></script>
+    <script src="../assets/js/rent-auth.js"></script>
+    <script src="../assets/js/rent-nav.js"></script>
+    <script>
+      (function () {
+        var u = RentAuth.requireOwner("../login.html");
+        if (!u) return;
+        var biz = RentDB.getPrimaryBusiness(u.id);
+        if (!biz) {
+          location.href = "../business/create.html";
+          return;
+        }
+        RentNav.renderDashNav(document.getElementById("dash-nav"), {
+          businessName: biz.name,
+          active: "home",
+        });
+
+        function locale() {
+          return RentI18n.getLang() === "uk" ? "uk-UA" : "en-US";
+        }
+
+        function render() {
+          var list = RentDB.listReservationsToday(biz.id);
+          var countEl = document.getElementById("dash-count");
+          var empty = document.getElementById("today-empty");
+          var ul = document.getElementById("today-list");
+          countEl.textContent = RentI18n.t(RentI18n.getLang(), "dash.today.count", { n: list.length });
+          ul.innerHTML = "";
+          if (!list.length) {
+            empty.classList.remove("hidden");
+            return;
+          }
+          empty.classList.add("hidden");
+          list.forEach(function (r) {
+            var s = RentDB.getService(r.serviceId);
+            var li = document.createElement("li");
+            li.innerHTML =
+              "<strong>" +
+              RentNav.esc(r.clientName) +
+              "</strong><br/><span class=\"subtitle\">" +
+              RentNav.esc(
+                RentFormat.slot(r.startAt, locale()) + " · " + (s ? s.name : "")
+              ) +
+              "</span>";
+            ul.appendChild(li);
+          });
+        }
+
+        function bookingUrl() {
+          var u = new URL("../book.html", window.location.href);
+          u.searchParams.set("slug", biz.slug);
+          return u.href;
+        }
+
+        var btnCopy = document.getElementById("btn-copy");
+        btnCopy.addEventListener("click", function () {
+          var url = bookingUrl();
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(url).then(function () {
+              btnCopy.textContent = RentI18n.t(RentI18n.getLang(), "dash.copy.copied");
+              setTimeout(function () {
+                RentI18n.apply(RentI18n.getLang());
+              }, 2000);
+            });
+          } else {
+            prompt("", url);
+          }
+        });
+
+        document.getElementById("btn-qr").addEventListener("click", function (e) {
+          var url = bookingUrl();
+          e.currentTarget.href =
+            "https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=" +
+            encodeURIComponent(url);
+        });
+
+        document.getElementById("tg-chat").value = biz.telegramChatId || "";
+        document.getElementById("tg-form").addEventListener("submit", function (e) {
+          e.preventDefault();
+          var v = document.getElementById("tg-chat").value.trim();
+          RentDB.updateBusiness(biz.id, { telegramChatId: v });
+        });
+
+        document.addEventListener("rent-lang-change", function () {
+          render();
+        });
+
+        render();
+      })();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="uk">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Rent — просте бронювання</title>
+    <meta
+      name="description"
+      content="Бронювання для клієнтів за кілька кроків. Статична версія для GitHub Pages."
+    />
+    <link rel="stylesheet" href="assets/styles.css" />
+  </head>
+  <body>
+    <div class="locale-switch">
+      <button type="button" data-lang="uk" aria-pressed="true"><span data-i18n="locale.uk">УК</span></button>
+      <button type="button" data-lang="en" aria-pressed="false"><span data-i18n="locale.en">EN</span></button>
+    </div>
+
+    <main class="main-center">
+      <div>
+        <h1 class="home-title" data-i18n="home.title">Rent</h1>
+        <p class="subtitle" data-i18n="home.subtitle">
+          Простий інтерфейс, потужний рушій — бронювання за кілька дотиків.
+        </p>
+        <ul class="feature-list">
+          <li><span class="dot">·</span> <span data-i18n="home.f1">Розклади</span></li>
+          <li><span class="dot">·</span> <span data-i18n="home.f2">Місткість</span></li>
+          <li><span class="dot">·</span> <span data-i18n="home.f3">Верифікація (згодом)</span></li>
+          <li><span class="dot">·</span> <span data-i18n="home.f4">Ресурси (згодом)</span></li>
+        </ul>
+        <p class="note-box" data-i18n="home.note"></p>
+      </div>
+      <div class="actions-col">
+        <a href="login.html" class="btn btn-primary" data-i18n="home.cta.signIn">Увійти</a>
+        <a href="register.html" class="btn btn-secondary" data-i18n="home.cta.register">Створити акаунт власника</a>
+        <a href="b/demo.html" class="btn btn-secondary" data-i18n="home.cta.demo">Демо бронювання (статично)</a>
+      </div>
+    </main>
+
+    <script src="assets/i18n.js"></script>
+  </body>
+</html>

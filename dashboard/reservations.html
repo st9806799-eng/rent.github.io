@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="uk">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Rent — бронювання</title>
+    <link rel="stylesheet" href="../assets/css/styles.css" />
+  </head>
+  <body>
+    <div class="locale-switch">
+      <button type="button" data-lang="uk" aria-pressed="true">
+        <span data-i18n="locale.uk">УК</span>
+      </button>
+      <button type="button" data-lang="en" aria-pressed="false">
+        <span data-i18n="locale.en">EN</span>
+      </button>
+    </div>
+    <div id="dash-nav"></div>
+    <div class="page-body">
+      <header style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1rem; margin-bottom: 1.5rem">
+        <div>
+          <h1 style="font-size: 1.5rem; font-weight: 600; margin: 0" data-i18n="reservations.title"></h1>
+          <p class="subtitle" data-i18n="reservations.subtitle"></p>
+        </div>
+        <a href="index.html" class="subtitle" style="align-self: center" data-i18n="dash.back"></a>
+      </header>
+      <p id="res-err" class="text-error hidden"></p>
+      <p id="res-empty" class="subtitle hidden" data-i18n="reservations.empty"></p>
+      <ul class="list-plain" id="res-list" style="margin: 0; padding: 0; list-style: none"></ul>
+    </div>
+    <script src="../assets/js/rent-i18n.js"></script>
+    <script src="../assets/js/rent-crypto.js"></script>
+    <script src="../assets/js/rent-slots.js"></script>
+    <script src="../assets/js/rent-format.js"></script>
+    <script src="../assets/js/rent-db.js"></script>
+    <script src="../assets/js/rent-auth.js"></script>
+    <script src="../assets/js/rent-nav.js"></script>
+    <script>
+      (function () {
+        var u = RentAuth.requireOwner("../login.html");
+        if (!u) return;
+        var biz = RentDB.getPrimaryBusiness(u.id);
+        if (!biz) {
+          location.href = "../business/create.html";
+          return;
+        }
+        RentNav.renderDashNav(document.getElementById("dash-nav"), {
+          businessName: biz.name,
+          active: "reservations",
+        });
+
+        function locale() {
+          return RentI18n.getLang() === "uk" ? "uk-UA" : "en-US";
+        }
+
+        function render() {
+          var list = RentDB.listReservationsUpcoming(biz.id);
+          var ul = document.getElementById("res-list");
+          var empty = document.getElementById("res-empty");
+          var err = document.getElementById("res-err");
+          err.classList.add("hidden");
+          ul.innerHTML = "";
+          if (!list.length) {
+            empty.classList.remove("hidden");
+            return;
+          }
+          empty.classList.add("hidden");
+          list.forEach(function (r) {
+            var svc = RentDB.getService(r.serviceId);
+            var li = document.createElement("li");
+            li.className = "rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-3";
+            li.style.cssText =
+              "border-radius:0.75rem;border:1px solid var(--border);background:var(--surface);padding:0.75rem 1rem;margin-bottom:0.75rem";
+            var line =
+              RentFormat.slot(r.startAt, locale()) + " · " + (svc ? svc.name : "");
+            li.innerHTML =
+              '<div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:0.75rem;align-items:flex-start">' +
+              "<div><strong>" +
+              RentNav.esc(r.clientName) +
+              "</strong><br/><span class=\"subtitle\">" +
+              RentNav.esc(line) +
+              "</span></div>" +
+              '<div style="display:flex;flex-wrap:wrap;gap:0.5rem">' +
+              '<button type="button" class="btn btn-secondary btn-sm rent-r-cancel" data-id="' +
+              RentNav.esc(r.id) +
+              '">' +
+              RentI18n.t(RentI18n.getLang(), "ownerRow.cancel") +
+              "</button>" +
+              '<button type="button" class="btn btn-secondary btn-sm rent-r-move" data-id="' +
+              RentNav.esc(r.id) +
+              '">' +
+              RentI18n.t(RentI18n.getLang(), "ownerRow.move") +
+              "</button>" +
+              "</div></div>" +
+              '<div class="rent-r-slots hidden" style="margin-top:0.75rem;max-height:12rem;overflow:auto;border:1px solid var(--border);border-radius:0.5rem;padding:0.5rem"></div>';
+            ul.appendChild(li);
+          });
+
+          ul.querySelectorAll(".rent-r-cancel").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+              RentDB.cancelReservation(btn.getAttribute("data-id"));
+              render();
+            });
+          });
+
+          ul.querySelectorAll(".rent-r-move").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+              var id = btn.getAttribute("data-id");
+              var row = btn.closest("li");
+              var panel = row.querySelector(".rent-r-slots");
+              var opening = panel.classList.contains("hidden");
+              ul.querySelectorAll(".rent-r-slots").forEach(function (p) {
+                p.classList.add("hidden");
+                p.innerHTML = "";
+              });
+              ul.querySelectorAll(".rent-r-move").forEach(function (b) {
+                b.textContent = RentI18n.t(RentI18n.getLang(), "ownerRow.move");
+              });
+              if (!opening) return;
+              btn.textContent = RentI18n.t(RentI18n.getLang(), "ownerRow.close");
+              panel.classList.remove("hidden");
+              var res = RentDB.getReservation(id);
+              var slots = RentDB.getAvailableSlotIsos(
+                biz.id,
+                res.serviceId,
+                id,
+                14
+              );
+              if (!slots.length) {
+                panel.innerHTML =
+                  "<p class=\"subtitle\">" +
+                  RentI18n.t(RentI18n.getLang(), "booking.pickTime") +
+                  "</p>";
+                return;
+              }
+              var grid = document.createElement("div");
+              grid.style.cssText = "display:grid;gap:0.25rem;grid-template-columns:repeat(2,1fr)";
+              slots.forEach(function (iso) {
+                var b = document.createElement("button");
+                b.type = "button";
+                b.className = "slot-btn";
+                b.textContent = RentFormat.slot(iso, locale());
+                b.addEventListener("click", function () {
+                  var out = RentDB.updateReservationStart(id, iso);
+                  if (out.error) {
+                    document.getElementById("res-err").textContent = RentI18n.t(
+                      RentI18n.getLang(),
+                      "booking.error.overlap"
+                    );
+                    document.getElementById("res-err").classList.remove("hidden");
+                    return;
+                  }
+                  render();
+                });
+                grid.appendChild(b);
+              });
+              panel.appendChild(grid);
+            });
+          });
+        }
+
+        document.addEventListener("rent-lang-change", render);
+        render();
+      })();
+    </script>
+  </body>
+</html>

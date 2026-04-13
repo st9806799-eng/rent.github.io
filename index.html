@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="uk">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Rent</title>
+    <meta
+      name="description"
+      content="Бронювання в браузері без Node.js — HTML, CSS, JavaScript."
+    />
+    <link rel="stylesheet" href="assets/css/styles.css" />
+  </head>
+  <body>
+    <div class="locale-switch">
+      <button type="button" data-lang="uk" aria-pressed="true">
+        <span data-i18n="locale.uk">УК</span>
+      </button>
+      <button type="button" data-lang="en" aria-pressed="false">
+        <span data-i18n="locale.en">EN</span>
+      </button>
+    </div>
+
+    <main class="main-center">
+      <div>
+        <h1 class="home-title" data-i18n="home.title">Rent</h1>
+        <p class="subtitle" data-i18n="home.subtitle"></p>
+        <ul class="feature-list">
+          <li><span class="dot">·</span> <span data-i18n="home.f1"></span></li>
+          <li><span class="dot">·</span> <span data-i18n="home.f2"></span></li>
+          <li><span class="dot">·</span> <span data-i18n="home.f3"></span></li>
+          <li><span class="dot">·</span> <span data-i18n="home.f4"></span></li>
+        </ul>
+        <p class="note-box" data-i18n="home.note"></p>
+      </div>
+      <div id="home-actions" class="actions-col"></div>
+    </main>
+
+    <script src="assets/js/rent-i18n.js"></script>
+    <script src="assets/js/rent-crypto.js"></script>
+    <script src="assets/js/rent-slots.js"></script>
+    <script src="assets/js/rent-format.js"></script>
+    <script src="assets/js/rent-db.js"></script>
+    <script src="assets/js/rent-auth.js"></script>
+    <script>
+      function renderHomeActions() {
+        var el = document.getElementById("home-actions");
+        if (!el) return;
+        var L = RentI18n.getLang();
+        var t = function (k) {
+          return RentI18n.t(L, k);
+        };
+        var u = RentAuth.getSessionUser();
+        var html = "";
+        if (!u) {
+          html +=
+            '<a href="login.html" class="btn btn-primary">' + t("home.cta.signIn") + "</a>";
+          html +=
+            '<a href="register.html" class="btn btn-secondary">' +
+            t("home.cta.register") +
+            "</a>";
+        } else if (u.role === "ADMIN") {
+          html +=
+            '<a href="admin/index.html" class="btn btn-primary">' +
+            t("home.cta.admin") +
+            "</a>";
+        } else {
+          var biz = RentDB.getPrimaryBusiness(u.id);
+          if (biz) {
+            html +=
+              '<a href="dashboard/index.html" class="btn btn-primary">' +
+              t("home.cta.dashboard") +
+              "</a>";
+          } else {
+            html +=
+              '<a href="business/create.html" class="btn btn-primary">' +
+              t("home.cta.createBusiness") +
+              "</a>";
+          }
+        }
+        el.innerHTML = html;
+      }
+      document.addEventListener("DOMContentLoaded", renderHomeActions);
+      document.addEventListener("rent-lang-change", renderHomeActions);
+    </script>
+  </body>
+</html>

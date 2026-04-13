@@ -91,8 +91,6 @@ model Reservation {
   reminderLinkToken    String?   @unique
   /// Когда отправили напоминание за ~24 ч (чтобы не дублировать)
   reminderSentAt       DateTime?
-  /// Для status=pending_payment — слот утримується до цього часу
-  paymentExpiresAt     DateTime?
 
   @@index([branchId, startAt])
   @@index([clientPhone, branchId])

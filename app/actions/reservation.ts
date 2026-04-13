@@ -12,13 +12,6 @@ import {
 import { newReminderLinkToken } from "@/lib/reminder-token";
 import { buildReminderDeepLink } from "@/lib/telegram";
 import {
-  bookingHoldMinutes,
-  buildReservationHoldCheckout,
-  isLiqPayConfigured,
-} from "@/lib/liqpay";
-import { createReservationMonobankInvoice, isMonobankConfigured } from "@/lib/monobank";
-import { getPublicBaseUrl } from "@/lib/site-url";
-import {
   notifyOwnerNewBooking,
   notifyOwnerBookingCancelled,
   notifyOwnerBookingMoved,
@@ -29,33 +22,15 @@ import {
 } from "@/lib/telegram-notify";
 
 const ACTIVE = "confirmed";
-const PAYMENT_PENDING = "pending_payment";
 
-export type BookActionResult =
-  | {
-      kind: "confirmed";
-      id: string;
-      telegramReminderUrl: string | null;
-    }
-  | {
-      kind: "needs_payment";
-      reservationId: string;
-      liqpayData: string;
-      liqpaySignature: string;
-    }
-  | {
-      kind: "redirect_monobank";
-      pageUrl: string;
-    };
+export type BookActionResult = {
+  kind: "confirmed";
+  id: string;
+  telegramReminderUrl: string | null;
+};
 
 function blockingSlotStatusesFilter() {
-  const now = new Date();
-  return {
-    OR: [
-      { status: ACTIVE },
-      { status: PAYMENT_PENDING, paymentExpiresAt: { gt: now } },
-    ],
-  };
+  return { status: ACTIVE };
 }
 
 export async function getAvailableSlotsAction(input: {
@@ -131,19 +106,7 @@ export async function bookAction(input: {
   });
   if (conflict) throw new Error("Slot taken");
 
-  const useMonobank = isMonobankConfigured();
-  const useLiqPay = isLiqPayConfigured() && !useMonobank;
-  const usePayment = useMonobank || useLiqPay;
-  if (usePayment && !getPublicBaseUrl()) {
-    throw new Error(
-      "Онлайн-оплата увімкнена, але не задано NEXT_PUBLIC_APP_URL (публічна адреса сайту)."
-    );
-  }
-
-  const paymentExpiresAt = useLiqPay
-    ? new Date(Date.now() + bookingHoldMinutes() * 60 * 1000)
-    : null;
-  const reminderToken = useLiqPay ? null : newReminderLinkToken();
+  const reminderToken = newReminderLinkToken();
 
   const r = await prisma.reservation.create({
     data: {
@@ -153,8 +116,7 @@ export async function bookAction(input: {
       endAt,
       clientName: input.clientName.trim(),
       clientPhone: input.clientPhone.trim(),
-      status: useLiqPay ? PAYMENT_PENDING : ACTIVE,
-      paymentExpiresAt,
+      status: ACTIVE,
       reminderLinkToken: reminderToken,
     },
     include: { service: true },
@@ -169,53 +131,6 @@ export async function bookAction(input: {
   revalidatePath(`/b/${input.businessSlug}`);
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/reservations");
-
-  if (useLiqPay) {
-    const checkout = buildReservationHoldCheckout({
-      reservationId: r.id,
-      businessName: biz.name,
-      serviceName: r.service.name,
-      clientName: r.clientName,
-      businessSlug: input.businessSlug,
-    });
-    return {
-      kind: "needs_payment",
-      reservationId: r.id,
-      liqpayData: checkout.data,
-      liqpaySignature: checkout.signature,
-    };
-  }
-
-  if (useMonobank) {
-    try {
-      const { pageUrl } = await createReservationMonobankInvoice({
-        reservationId: r.id,
-        businessName: biz.name,
-        serviceName: r.service.name,
-        clientName: r.clientName,
-        businessSlug: input.businessSlug,
-      });
-      try {
-        await notifyOwnerNewBooking({
-          ownerChatId: biz.telegramChatId,
-          businessName: biz.name,
-          clientName: r.clientName,
-          clientPhone: r.clientPhone,
-          serviceName: r.service.name,
-          startIso: r.startAt.toISOString(),
-        });
-      } catch (e) {
-        console.error("Owner telegram notify failed:", e);
-      }
-      return { kind: "redirect_monobank", pageUrl };
-    } catch (e) {
-      await prisma.reservation.delete({ where: { id: r.id } });
-      revalidatePath(`/b/${input.businessSlug}`);
-      revalidatePath("/dashboard");
-      revalidatePath("/dashboard/reservations");
-      throw e instanceof Error ? e : new Error("Не вдалося створити оплату Monobank");
-    }
-  }
 
   try {
     await notifyOwnerNewBooking({
@@ -233,7 +148,7 @@ export async function bookAction(input: {
   return {
     kind: "confirmed",
     id: r.id,
-    telegramReminderUrl: buildReminderDeepLink(reminderToken!),
+    telegramReminderUrl: buildReminderDeepLink(reminderToken),
   };
 }
 
@@ -246,7 +161,7 @@ export async function clientCancelAction(input: { businessSlug: string; reservat
     where: {
       id: input.reservationId,
       branchId: branch.id,
-      status: { in: [ACTIVE, PAYMENT_PENDING] },
+      status: ACTIVE,
     },
     include: { service: true },
   });
@@ -255,24 +170,22 @@ export async function clientCancelAction(input: { businessSlug: string; reservat
     where: {
       id: input.reservationId,
       branchId: branch.id,
-      status: { in: [ACTIVE, PAYMENT_PENDING] },
+      status: ACTIVE,
     },
     data: { status: "cancelled" },
   });
 
   if (row) {
-    if (row.status === ACTIVE) {
-      try {
-        await notifyOwnerBookingCancelled({
-          ownerChatId: biz.telegramChatId,
-          businessName: biz.name,
-          clientName: row.clientName,
-          serviceName: row.service.name,
-          startIso: row.startAt.toISOString(),
-        });
-      } catch (e) {
-        console.error("Owner telegram cancel notify failed:", e);
-      }
+    try {
+      await notifyOwnerBookingCancelled({
+        ownerChatId: biz.telegramChatId,
+        businessName: biz.name,
+        clientName: row.clientName,
+        serviceName: row.service.name,
+        startIso: row.startAt.toISOString(),
+      });
+    } catch (e) {
+      console.error("Owner telegram cancel notify failed:", e);
     }
     if (row.clientTelegramChatId) {
       try {
@@ -374,7 +287,7 @@ export async function ownerCancelReservationAction(reservationId: string) {
     where: {
       id: reservationId,
       branchId: branch.id,
-      status: { in: [ACTIVE, PAYMENT_PENDING] },
+      status: ACTIVE,
     },
     include: { service: true, branch: { include: { business: true } } },
   });
@@ -385,7 +298,7 @@ export async function ownerCancelReservationAction(reservationId: string) {
     data: { status: "cancelled" },
   });
 
-  if (row.status === ACTIVE && row.clientTelegramChatId) {
+  if (row.clientTelegramChatId) {
     try {
       await notifyClientBookingCancelledByOwner({
         clientChatId: row.clientTelegramChatId,
@@ -465,10 +378,7 @@ export async function lookupReservationByPhoneAction(input: {
       branchId: branch.id,
       clientPhone: input.phone.trim(),
       endAt: { gte: new Date() },
-      OR: [
-        { status: ACTIVE },
-        { status: PAYMENT_PENDING, paymentExpiresAt: { gt: new Date() } },
-      ],
+      status: ACTIVE,
     },
     orderBy: { startAt: "asc" },
     include: { service: true },
