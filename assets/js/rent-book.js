@@ -38,6 +38,7 @@
   }
 
   function init() {
+    var DEFAULT_TELEGRAM_BOT_USERNAME = "ReservationUA_bot";
     var slug = qs("slug");
     var errSlug = document.getElementById("book-error-slug");
     var err404 = document.getElementById("book-error-404");
@@ -93,7 +94,7 @@
       var raw = String(
         (biz && (biz.telegramBotLink || biz.telegramBotUsername || biz.telegramChatId)) || ""
       ).trim();
-      if (!raw) return null;
+      if (!raw) raw = DEFAULT_TELEGRAM_BOT_USERNAME;
       if (/^https?:\/\//i.test(raw)) return raw;
       var username = raw.replace(/^@/, "");
       if (!username || /^\d+$/.test(username)) return null;
