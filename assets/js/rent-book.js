@@ -38,7 +38,9 @@
   }
 
   function init() {
-    var DEFAULT_TELEGRAM_BOT_USERNAME = "ReservationUA_bot";
+    var DEFAULT_TELEGRAM_BOT_USERNAME = String(global.RENT_TELEGRAM_BOT || "ReservationUA_bot")
+      .trim()
+      .replace(/^@/, "");
     var slug = qs("slug");
     var errSlug = document.getElementById("book-error-slug");
     var err404 = document.getElementById("book-error-404");
