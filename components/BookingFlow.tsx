@@ -407,17 +407,7 @@ export function BookingFlow({
           <h2 className="text-lg font-medium text-[var(--success)]">{t("booking.success.title")}</h2>
           <p className="text-sm text-[var(--muted)]">{t("booking.success.saved")}</p>
           {tgReminderUrl && (
-            <>
-              <p className="text-sm text-[var(--muted)]">{t("booking.success.telegramHint")}</p>
-              <a
-                href={tgReminderUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex w-full justify-center rounded-xl border border-[var(--accent)] py-3 font-medium text-[var(--accent)] hover:bg-[var(--accent)]/10"
-              >
-                {t("booking.modal.openTelegram")}
-              </a>
-            </>
+            <p className="text-sm text-[var(--muted)]">{t("booking.success.telegramHint")}</p>
           )}
           <button
             type="button"
@@ -486,6 +476,19 @@ export function BookingFlow({
           </button>
         </div>
       </footer>
+
+      {view === "success" && tgReminderUrl && (
+        <div className="mt-12 px-2">
+          <a
+            href={tgReminderUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex w-full justify-center border-2 border-[var(--accent)] px-4 py-4 text-3xl font-medium text-[var(--accent)] hover:bg-[var(--accent)]/10"
+          >
+            {t("booking.modal.openTelegram")}
+          </a>
+        </div>
+      )}
     </main>
   );
 }
