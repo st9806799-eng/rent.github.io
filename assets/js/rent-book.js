@@ -72,6 +72,8 @@
     var slotGrid = document.getElementById("slot-grid");
     var lookupForm = document.getElementById("lookup-form");
     var lookupErr = document.getElementById("lookup-err");
+    var successTelegramCta = document.getElementById("success-telegram-cta");
+    var successTelegramLink = document.getElementById("success-telegram-link");
 
     var state = {
       serviceId: null,
@@ -84,6 +86,33 @@
 
     function refreshI18n() {
       global.RentI18n.apply(global.RentI18n.getLang());
+    }
+
+    function buildTelegramUrl() {
+      // Static build fallback: support full URL or bot username in business fields.
+      var raw = String(
+        (biz && (biz.telegramBotLink || biz.telegramBotUsername || biz.telegramChatId)) || ""
+      ).trim();
+      if (!raw) return null;
+      if (/^https?:\/\//i.test(raw)) return raw;
+      var username = raw.replace(/^@/, "");
+      if (!username || /^\d+$/.test(username)) return null;
+      return "https://t.me/" + username;
+    }
+
+    function hideSuccessTelegramCta() {
+      if (successTelegramCta) hide(successTelegramCta);
+    }
+
+    function showSuccessTelegramCta() {
+      if (!successTelegramCta || !successTelegramLink) return;
+      var tgUrl = buildTelegramUrl();
+      if (!tgUrl) {
+        hide(successTelegramCta);
+        return;
+      }
+      successTelegramLink.href = tgUrl;
+      show(successTelegramCta);
     }
 
     document.addEventListener("rent-lang-change", function () {
@@ -146,6 +175,7 @@
       hide(elTimes);
       hide(elDetails);
       hide(elSuccess);
+      hideSuccessTelegramCta();
       show(elExisting);
       renderExisting(r);
       return true;
@@ -183,6 +213,7 @@
       state.existing = null;
       hide(elExisting);
       hide(elSuccess);
+      hideSuccessTelegramCta();
       if (services.length === 0) {
         show(elServices);
         listServices.innerHTML =
@@ -340,6 +371,7 @@
       savePhone(slug, phone);
       hide(elDetails);
       show(elSuccess);
+      showSuccessTelegramCta();
     });
 
     document.getElementById("btn-new-booking").addEventListener("click", function () {
@@ -363,6 +395,7 @@
         hide(elTimes);
         hide(elDetails);
         hide(elSuccess);
+        hideSuccessTelegramCta();
         show(elExisting);
         renderExisting(r);
       });
