@@ -72,18 +72,10 @@ export async function notifyClientBookingConfirmed(input: {
   clientName: string;
   startIso: string;
 }) {
-  const when = formatDateTimeUk(input.startIso);
+  const when = formatTimeDateUk(input.startIso);
   await sendTelegramMessage(
     input.clientChatId,
-    [
-      "<b>Бронь підтверджено</b>",
-      `🏢 ${escapeHtml(input.businessName)}`,
-      `📌 ${escapeHtml(input.serviceName)}`,
-      `👤 ${escapeHtml(input.clientName)}`,
-      `🕐 ${escapeHtml(when)}`,
-      "",
-      "Нагадування надішлемо сюди приблизно за <b>24 години</b> до візиту.",
-    ].join("\n")
+    `✅ Успішне бронювання! Ви забронювали ${escapeHtml(input.serviceName)} на ${escapeHtml(when)}.`
   );
 }
 
@@ -93,17 +85,9 @@ export async function notifyClientReminder(input: {
   serviceName: string;
   startIso: string;
 }) {
-  const when = formatDateTimeUk(input.startIso);
   await sendTelegramMessage(
     input.clientChatId,
-    [
-      "<b>Нагадування про візит</b>",
-      `🏢 ${escapeHtml(input.businessName)}`,
-      `📌 ${escapeHtml(input.serviceName)}`,
-      `🕐 ${escapeHtml(when)}`,
-      "",
-      "До зустрічі!",
-    ].join("\n")
+    `⏰ Ви записані через дві години на ${escapeHtml(input.serviceName)}, не забудьте!`
   );
 }
 
@@ -186,4 +170,18 @@ function escapeHtml(s: string): string {
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");
+}
+
+function formatTimeDateUk(iso: string): string {
+  const date = new Date(iso);
+  const time = date.toLocaleTimeString("uk-UA", {
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  const day = date.toLocaleDateString("uk-UA", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+  return `${time} ${day}`;
 }

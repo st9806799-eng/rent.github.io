@@ -23,7 +23,7 @@ export const ukMessages = {
   "booking.success.saved":
     "Ми зберегли час. Поверніться на цю сторінку пізніше — зможете змінити або скасувати бронь.",
   "booking.success.telegramHint":
-    "Натисніть кнопку нижче, щоб відкрити Telegram-бота — там можна увімкнути нагадування приблизно за 24 год до візиту.",
+    "Натисніть кнопку нижче, щоб відкрити Telegram-бота — там можна увімкнути нагадування приблизно за 2 години до візиту.",
   "booking.done": "Готово",
   "booking.reschedule.newTime": "Новий час",
   "booking.footer.lookupTitle": "Уже є бронювання?",
@@ -174,7 +174,7 @@ export const enMessages: Record<MessageKey, string> = {
   "booking.success.saved":
     "We saved your slot. Come back later to reschedule or cancel.",
   "booking.success.telegramHint":
-    "Tap the button below to open the Telegram bot — you can enable reminders about 24 hours before your visit.",
+    "Tap the button below to open the Telegram bot — you can enable reminders about 2 hours before your visit.",
   "booking.done": "Done",
   "booking.reschedule.newTime": "New time",
   "booking.footer.lookupTitle": "Already booked?",

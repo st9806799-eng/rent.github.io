@@ -116,7 +116,7 @@ export async function POST(req: NextRequest) {
   if (res.clientTelegramChatId === chatId) {
     await sendTelegramPlain(
       chatId,
-      "Ця бронь уже підключена до цього чату. Нагадування надійдуть приблизно за 24 год до візиту."
+      "Ця бронь уже підключена до цього чату. Нагадування надійде приблизно за 2 години до візиту."
     );
     return NextResponse.json({ ok: true });
   }

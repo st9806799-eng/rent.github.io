@@ -4,7 +4,7 @@ import { notifyClientReminder } from "@/lib/telegram-notify";
 
 export const runtime = "nodejs";
 
-/** Викликайте щогодини (cron / Windows Task Scheduler) з заголовком Authorization: Bearer CRON_SECRET */
+/** Викликайте щонайменше раз на годину (cron / Windows Task Scheduler) з заголовком Authorization: Bearer CRON_SECRET */
 export async function GET(req: NextRequest) {
   const secret = process.env.CRON_SECRET?.trim();
   if (!secret || req.headers.get("authorization") !== `Bearer ${secret}`) {
@@ -12,8 +12,8 @@ export async function GET(req: NextRequest) {
   }
 
   const now = Date.now();
-  const from = new Date(now + 23 * 60 * 60 * 1000);
-  const to = new Date(now + 25 * 60 * 60 * 1000);
+  const from = new Date(now + 1 * 60 * 60 * 1000);
+  const to = new Date(now + 3 * 60 * 60 * 1000);
 
   const rows = await prisma.reservation.findMany({
     where: {
