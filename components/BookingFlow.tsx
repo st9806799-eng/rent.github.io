@@ -409,13 +409,14 @@ export function BookingFlow({
           {tgReminderUrl && (
             <>
               <p className="text-sm text-[var(--muted)]">{t("booking.success.telegramHint")}</p>
-              <button
-                type="button"
-                onClick={() => setTgModalUrl(tgReminderUrl)}
+              <a
+                href={tgReminderUrl}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="flex w-full justify-center rounded-xl border border-[var(--accent)] py-3 font-medium text-[var(--accent)] hover:bg-[var(--accent)]/10"
               >
-                {t("booking.confirmBooking")}
-              </button>
+                {t("booking.modal.openTelegram")}
+              </a>
             </>
           )}
           <button
