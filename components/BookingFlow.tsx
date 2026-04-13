@@ -184,7 +184,6 @@ export function BookingFlow({
         });
         setTgReminderUrl(out.telegramReminderUrl);
         setView("success");
-        router.refresh();
       } catch (e) {
         setErr(e instanceof Error ? e.message : t("booking.error.bookFailed"));
       }
