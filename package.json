@@ -7,6 +7,8 @@
     "build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
+    "db:push": "prisma db push",
+    "db:migrate": "prisma migrate dev",
     "postinstall": "prisma generate",
     "telegram:set-webhook": "node scripts/telegram-set-webhook.mjs"
   },

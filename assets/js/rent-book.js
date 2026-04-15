@@ -100,7 +100,11 @@
       if (/^https?:\/\//i.test(raw)) return raw;
       var username = raw.replace(/^@/, "");
       if (!username || /^\d+$/.test(username)) return null;
-      return "https://t.me/" + username;
+      var safeSlug = String(slug || "")
+        .trim()
+        .replace(/[^a-zA-Z0-9_-]/g, "");
+      var startSuffix = safeSlug ? "?start=book_" + safeSlug : "";
+      return "https://t.me/" + username + startSuffix;
     }
 
     function hideSuccessTelegramCta() {
