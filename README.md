@@ -32,7 +32,7 @@
 
 ## Vercel Cron
 
-`vercel.json` contains hourly cron:
+`vercel.json` contains daily cron (Hobby-compatible):
 - `GET /api/cron/reminders`
 
 For authorization, keep `CRON_SECRET` in Vercel environment variables.
